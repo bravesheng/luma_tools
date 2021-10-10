@@ -22,7 +22,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                     new_row['資料來源'] = '貝殼放大-一般訂單'
                 #捐款日期
                 donate_date = datetime.strptime(bf_row['付款時間'], '%Y-%m-%d %H:%M:%S %z')
-                new_row['捐款日期'] = donate_date.strftime("%Y%m-%d")
+                new_row['捐款日期'] = donate_date.strftime("%Y-%m-%d")
                 #交易編號
                 new_row['交易編號'] = bf_row['金流單號']
                 #付款方式

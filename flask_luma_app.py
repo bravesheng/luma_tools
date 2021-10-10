@@ -3,7 +3,7 @@ from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from luma_tools import convert_bf_to_neticrm
 
-UPLOAD_FOLDER = os.getcwd()
+UPLOAD_FOLDER = os.getcwd() + '/csv'
 ALLOWED_EXTENSIONS = {'csv'}
 
 app = Flask(__name__)
@@ -31,7 +31,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             converted_filename = filename.replace('.csv','_neticrm.csv')
-            convert_bf_to_neticrm(filename,converted_filename)
+            convert_bf_to_neticrm(UPLOAD_FOLDER + '/' + filename,UPLOAD_FOLDER + '/' + converted_filename)
             return redirect(url_for('download_file', name=converted_filename))
     return '''
     <!doctype html>
