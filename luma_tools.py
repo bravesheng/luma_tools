@@ -15,7 +15,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 new_row = {'捐款金額':bf_row['總金額']} 
                 #訂單類別 #資料來源
                 if bf_row['訂單類別'].find('定期定額') != -1:
-                    new_row['訂單類別'] = '貝殼放大-定期定額贊助'
+                    new_row['訂單類別'] = '貝殼放大-定期定額'
                     new_row['資料來源'] = '貝殼放大-定期定額'
                 elif bf_row['訂單類別'].find('一般訂單') != -1:
                     new_row['訂單類別'] = '貝殼放大-一般訂單'
@@ -49,15 +49,23 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 else:
                     new_row['姓氏'] = bf_row['訂購人姓名'][0]
                     new_row['名字'] = bf_row['訂購人姓名'][1:len(bf_row['訂購人姓名'])]
-                #捐款徵信 #出生年
+                #捐款徵信 #出生年(只保留西元年，其他格式剔除)
                 bf_row['選項'] = bf_row['選項'].replace('\r\n', '')
                 options = bf_row['選項'].split(', ')
                 options[0] = options[0].replace('捐款人姓名（非必填）: ', '')
                 if len(options[0]) > 0:
                     new_row['捐款徵信'] = options[0]
                 if len(options) == 2:
-                    options[1] = options[1].replace('您的出生年份（非必填）: ', '')  
-                    new_row['出生年'] = options[1] 
+                    options[1] = options[1].replace('您的出生年份（非必填）: ', '') 
+                    options[1] = options[1].replace('\n', '') 
+                    try:
+                        birthYear = int(options[1])
+                    except:
+                        birthYear = 0
+                    if birthYear < 1800 or birthYear > 2100:
+                        new_row['出生年'] = None
+                    else:
+                        new_row['出生年'] = birthYear
                 #加入管道
                 new_row['加入管道'] = '貝殼放大'
                 #費用類型
@@ -75,6 +83,10 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 #收件者Email
                 new_row['收件者Email'] = bf_row['收件者Email']
                 #收件者電話
+                bf_row['收件者電話'] = bf_row['收件者電話'].replace('+886', '0')
+                bf_row['收件者電話'] = bf_row['收件者電話'].replace('+', '')
+                bf_row['收件者電話'] = bf_row['收件者電話'].replace('-', '')
+                bf_row['收件者電話'] = bf_row['收件者電話'].replace(' ', '')
                 new_row['收件者電話'] = bf_row['收件者電話']
                 #所在國家
                 new_row['所在國家'] = bf_row['所在國家']

@@ -2,6 +2,8 @@ import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from luma_tools import convert_bf_to_neticrm
+from shutil import rmtree
+from datetime import datetime
 
 UPLOAD_FOLDER = os.getcwd() + '/csv'
 ALLOWED_EXTENSIONS = {'csv'}
@@ -29,8 +31,16 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+            #rebuild temp folder
+            if os.path.isdir(app.config['UPLOAD_FOLDER']):
+                rmtree(app.config['UPLOAD_FOLDER'])
+            os.mkdir(app.config['UPLOAD_FOLDER'])
+            #save original csv
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            converted_filename = filename.replace('.csv','_neticrm.csv')
+            #prepare new csv file name
+            now = datetime.now()
+            converted_filename = filename.replace('.csv','_neticrm_' + now.strftime('%y%m%d%H%M%S') + '.csv')
+            #convert
             convert_bf_to_neticrm(UPLOAD_FOLDER + '/' + filename,UPLOAD_FOLDER + '/' + converted_filename)
             return redirect(url_for('download_file', name=converted_filename))
     return '''
