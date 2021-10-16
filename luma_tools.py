@@ -44,7 +44,11 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 #姓名
                 new_row['姓名'] = bf_row['訂購人姓名']
                 #姓氏 #名字
-                if len(bf_row['訂購人姓名']) > 3:
+                if len(bf_row['訂購人姓名']) == 4:
+                    bf_row['訂購人姓名'] = bf_row['訂購人姓名'].replace(' ', '')
+                    new_row['姓氏'] = bf_row['訂購人姓名'][2]
+                    new_row['名字'] = bf_row['訂購人姓名'][0:2]
+                elif len(bf_row['訂購人姓名']) > 3:
                     new_row['姓氏'] = bf_row['訂購人姓名']
                 else:
                     new_row['姓氏'] = bf_row['訂購人姓名'][0]
