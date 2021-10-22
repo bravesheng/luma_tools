@@ -38,9 +38,12 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 notes_type = ('理念支持 - 備註','片片美意 - 備註','深入南島 - 備註','南島之友*12 - 備註','南島之友 - 備註','理念支持 - 備註',
                 '揮汗成雨 - 備註','感謝常存 - 備註','將美留下 - 備註','薪火相傳 - 備註')
                 for note in notes_type:
-                    if len(bf_row[note]) > 0:
-                        new_row['捐款者留言'] = bf_row[note]
-                        break
+                    if bf_row.get(note) == None:
+                        new_row['捐款者留言'] = None
+                    else:
+                        if len(bf_row[note]) > 0:
+                            new_row['捐款者留言'] = bf_row[note]
+                            break
                 #姓名
                 new_row['姓名'] = bf_row['訂購人姓名']
                 #姓氏 #名字
