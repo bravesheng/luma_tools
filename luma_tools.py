@@ -34,6 +34,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 elif bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
                     new_row['贊助方案'] = bf_row['贊助明細'].replace('全魯凱語山上教室 集資計畫 - ', '')
                     new_row['訂單類別'] = new_row['訂單類別'] + '_魯'
+                    new_row['資料來源'] = new_row['資料來源'] + '_魯'
                 #導購來源
                 new_row['導購來源'] = bf_row['導購來源']
                 #商家備註
