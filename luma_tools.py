@@ -104,7 +104,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 new_row['所在國家'] = bf_row['所在國家']
                 #居住城市
                 new_row['居住城市'] = bf_row['居住城市']
-                new_row['居住城市'] = new_row['居住城市'].replace('台北市','臺北市')
+                new_row['居住城市'] = new_row['居住城市'].replace('台','臺')
                 #居住區域
                 new_row['居住區域'] = bf_row['居住區域']
                 #郵遞區號
