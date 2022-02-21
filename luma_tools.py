@@ -4,7 +4,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
     with open(bf_filename, newline='') as csvin:
         bf_rows = csv.DictReader(csvin)
         with open(neticrm_filename, 'w', newline='') as csvout:
-            fieldnames = ['捐款金額','訂單類別','捐款日期','交易編號','付款方式','贊助方案','特殊需求',
+            fieldnames = ['捐款金額','訂單類別','捐款日期','交易編號','付款方式','贊助方案','職業','性別','特殊需求',
             '導購來源','商家備註','捐款者留言','姓名','姓氏','名字','捐款徵信','出生年','加入管道','費用類型',
             '性別','族群','資料來源','訂購人姓名','訂購人Email','訂購人電話','wabay會員姓名','收件者姓名','收件者Email',
             '收件者電話','所在國家','居住城市','居住區域','郵遞區號','收件者地址','已建立','收據']
@@ -32,9 +32,13 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 if bf_row['贊助明細'].find('全母語河邊教室') != -1:
                     new_row['贊助方案'] = bf_row['贊助明細'].replace('全母語河邊教室｜集資計畫 - ', '')
                 elif bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
-                    new_row['贊助方案'] = bf_row['贊助明細'].replace('全魯凱語山上教室 集資計畫 - ', '')
+                    new_row['贊助方案'] = bf_row['贊助明細'].replace('《全魯凱語山上教室》集資計畫｜讓扎根在石板屋裡的魯凱族，重新萌芽於山林之間 - ', '')
                     new_row['訂單類別'] = '02' + new_row['訂單類別']
                     new_row['資料來源'] = '02' + new_row['資料來源']
+                #職業
+                new_row['職業'] = bf_row['職業（非必填） ']
+                #性別
+                new_row['性別'] = bf_row['性別（非必填） ']
                 #導購來源
                 new_row['導購來源'] = bf_row['導購來源']
                 #商家備註
@@ -111,4 +115,5 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 new_row['郵遞區號'] = bf_row['郵遞區號']
                 #收件者地址
                 new_row['收件者地址'] = bf_row['收件者地址']
+
                 writer.writerow(new_row)
