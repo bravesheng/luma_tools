@@ -1,5 +1,39 @@
 import csv
 from datetime import datetime
+
+def check_if_rukau(inputFileName):
+    with open(inputFileName, newline='') as csvin:
+        bf_rows = csv.DictReader(csvin)
+        for bf_row in bf_rows:
+            if bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
+                return True
+            else:
+                return False
+
+
+def modify_header(inputFileName, outputFileName):
+    with open(inputFileName, newline='') as inFile, open(outputFileName, 'w', newline='') as outfile:
+        r = csv.reader(inFile)
+        w = csv.writer(outfile)
+
+        next(r, None)  # skip the first row from the reader, the old header
+        # write new header
+        w.writerow(['訂單類別','金流單號','贊助明細','總數量','商品總金額','額外贊助','其他金額款項','小計','運費',
+        '折扣金額（折扣券）','折抵紅利點數','總金額','預計發送紅利點數','已退款金額','目前金額','幣別','商家註記','標籤',
+        '導購來源','導購參數','選項','狀態','收件者姓名','收件者Email','收件者電話','所在國家','居住城市','居住區域',
+        '郵遞區號','收件者地址','想說的話','寄送方式','超商系統','門市名稱','門市代號','門市地址','訂購人姓名','訂購人Email',
+        '訂購人電話','會員ID','會員姓名','會員Email','付款方式','信用卡末四碼','訂單建立時間','付款時間','退款／狀態更新時間',
+        '退款／狀態更新原因','退款／狀態更新操作者','退款／狀態更新操作者身份','實際單位數量','折扣券','出貨狀態','物流編號','分期',
+        '重新扎根 NTD$ 221','重新扎根紙本收據抬頭','重新扎根捐款人姓名','重新扎根出生年份','重新扎根職業','重新扎根性別','重新扎根備註',
+        '寸草春暉 NTD$ 416','寸草春暉紙本收據抬頭','寸草春暉捐款人姓名','寸草春暉出生年份','寸草春暉職業','寸草春暉性別','寸草春暉備註',
+        '春風化雨 NTD$ 641','春風化雨紙本收據抬頭','春風化雨捐款人姓名','春風化雨出生年份','春風化雨職業','春風化雨性別','春風化雨備註',
+        '薪火相傳 NTD$ 830','薪火相傳紙本收據抬頭','薪火相傳捐款人姓名','薪火相傳出生年份','薪火相傳職業','薪火相傳性別','薪火相傳備註',
+        '理念支持 NTD$ 221','理念支持紙本收據抬頭','理念支持捐款人姓名','理念支持出生年份','理念支持職業','理念支持性別','理念支持備註',
+        '理念支持 NTD$ 100','理念支持100備註'])
+        # copy the rest
+        for row in r:
+            w.writerow(row)
+
 def convert_bf_to_neticrm(bf_filename, neticrm_filename):
     with open(bf_filename, newline='') as csvin:
         bf_rows = csv.DictReader(csvin)
@@ -7,7 +41,7 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
             fieldnames = ['捐款金額','訂單類別','捐款日期','交易編號','付款方式','贊助方案','職業','性別','特殊需求',
             '導購來源','商家備註','捐款者留言','姓名','姓氏','名字','捐款徵信','出生年','加入管道','費用類型',
             '性別','族群','資料來源','訂購人姓名','訂購人Email','訂購人電話','wabay會員姓名','收件者姓名','收件者Email',
-            '收件者電話','所在國家','居住城市','居住區域','郵遞區號','收件者地址','已建立','收據']
+            '收件者電話','所在國家','居住城市','居住區域','郵遞區號','收件者地址','已建立','收據','收據抬頭']
             writer = csv.DictWriter(csvout, fieldnames = fieldnames)
             writer.writeheader()
             for bf_row in bf_rows:
@@ -35,24 +69,10 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                     new_row['贊助方案'] = bf_row['贊助明細'].replace('《全魯凱語山上教室》集資計畫｜讓扎根在石板屋裡的魯凱族，重新萌芽於山林之間 - ', '')
                     new_row['訂單類別'] = '02' + new_row['訂單類別']
                     new_row['資料來源'] = '02' + new_row['資料來源']
-                #職業
-                new_row['職業'] = bf_row['職業（非必填） ']
-                #性別
-                new_row['性別'] = bf_row['性別（非必填） ']
                 #導購來源
                 new_row['導購來源'] = bf_row['導購來源']
                 #商家備註
                 new_row['商家備註'] = bf_row['商家註記']
-                #捐款者留言
-                notes_type = ('理念支持 - 備註','片片美意 - 備註','深入南島 - 備註','南島之友*12 - 備註','南島之友 - 備註','理念支持 - 備註',
-                '揮汗成雨 - 備註','感謝常存 - 備註','將美留下 - 備註','薪火相傳 - 備註')
-                for note in notes_type:
-                    if bf_row.get(note) == None:
-                        new_row['捐款者留言'] = None
-                    else:
-                        if len(bf_row[note]) > 0:
-                            new_row['捐款者留言'] = bf_row[note]
-                            break
                 #姓名
                 new_row['姓名'] = bf_row['訂購人姓名']
                 #姓氏 #名字
@@ -115,5 +135,48 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 new_row['郵遞區號'] = bf_row['郵遞區號']
                 #收件者地址
                 new_row['收件者地址'] = bf_row['收件者地址']
+
+                #全母語河邊教室專用的相關欄位
+                if bf_row['贊助明細'].find('全母語河邊教室') != -1:
+                    #捐款者留言
+                    notes_type = ('理念支持 - 備註','片片美意 - 備註','深入南島 - 備註','南島之友*12 - 備註','南島之友 - 備註','理念支持 - 備註',
+                    '揮汗成雨 - 備註','感謝常存 - 備註','將美留下 - 備註','薪火相傳 - 備註','寸草春暉 - 備註',)
+                    for note in notes_type:
+                        if bf_row.get(note) == None:
+                            new_row['捐款者留言'] = None
+                        else:
+                            if len(bf_row[note]) > 0:
+                                new_row['捐款者留言'] = bf_row[note]
+                                break
+
+                #全魯凱語山上教室專用的相關欄位
+                if bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
+                    if bf_row['重新扎根 NTD$ 221'] == '1':
+                        donate_type = '重新扎根'
+                    elif bf_row['寸草春暉 NTD$ 416'] == '1':
+                        donate_type = '寸草春暉'
+                    elif bf_row['春風化雨 NTD$ 641'] == '1':
+                        donate_type = '春風化雨'
+                    elif bf_row['薪火相傳 NTD$ 830'] == '1':
+                        donate_type = '薪火相傳'
+                    elif bf_row['理念支持 NTD$ 221'] == '1':
+                        donate_type = '理念支持'
+                    elif bf_row['理念支持 NTD$ 100'] == '1':
+                        donate_type = '理念支持100'  
+                    #備註
+                    new_row['捐款者留言'] = bf_row[donate_type + '備註']
+                    if donate_type != '理念支持100':
+                        #職業
+                        new_row['職業'] = bf_row[donate_type + '職業']
+                        #性別
+                        if len(bf_row[donate_type + '性別']) > 1:
+                            new_row['性別'] = bf_row[donate_type + '性別'].replace('性', '') 
+                        #收據抬頭
+                        new_row['收據抬頭'] = bf_row[donate_type + '紙本收據抬頭']
+                        #捐款徵信
+                        if bf_row[donate_type + '捐款人姓名'] == '與紙本收據抬頭相同':
+                            new_row['捐款徵信'] = new_row['姓名']
+                        else:
+                            new_row['捐款徵信'] = bf_row[donate_type +'捐款人姓名']
 
                 writer.writerow(new_row)
