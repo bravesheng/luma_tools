@@ -85,23 +85,6 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                 else:
                     new_row['姓氏'] = bf_row['訂購人姓名'][0]
                     new_row['名字'] = bf_row['訂購人姓名'][1:len(bf_row['訂購人姓名'])]
-                #捐款徵信 #出生年(只保留西元年，其他格式剔除)
-                bf_row['選項'] = bf_row['選項'].replace('\r\n', '')
-                options = bf_row['選項'].split(', ')
-                options[0] = options[0].replace('捐款人姓名（非必填）: ', '')
-                if len(options[0]) > 0:
-                    new_row['捐款徵信'] = options[0]
-                if len(options) == 2:
-                    options[1] = options[1].replace('您的出生年份（非必填）: ', '') 
-                    options[1] = options[1].replace('\n', '') 
-                    try:
-                        birthYear = int(options[1])
-                    except:
-                        birthYear = 0
-                    if birthYear < 1800 or birthYear > 2100:
-                        new_row['出生年'] = None
-                    else:
-                        new_row['出生年'] = birthYear
                 #加入管道
                 new_row['加入管道'] = '貝殼放大'
                 #費用類型
@@ -148,6 +131,23 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                             if len(bf_row[note]) > 0:
                                 new_row['捐款者留言'] = bf_row[note]
                                 break
+                    #捐款徵信 #出生年(只保留西元年，其他格式剔除)
+                    bf_row['選項'] = bf_row['選項'].replace('\r\n', '')
+                    options = bf_row['選項'].split(', ')
+                    options[0] = options[0].replace('捐款人姓名（非必填）: ', '')
+                    if len(options[0]) > 0:
+                        new_row['捐款徵信'] = options[0]
+                    if len(options) == 2:
+                        options[1] = options[1].replace('您的出生年份（非必填）: ', '') 
+                        options[1] = options[1].replace('\n', '') 
+                        try:
+                            birthYear = int(options[1])
+                        except:
+                            birthYear = 0
+                        if birthYear < 1800 or birthYear > 2100:
+                            new_row['出生年'] = None
+                        else:
+                            new_row['出生年'] = birthYear
 
                 #全魯凱語山上教室專用的相關欄位
                 if bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
@@ -178,5 +178,14 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                             new_row['捐款徵信'] = new_row['姓名']
                         else:
                             new_row['捐款徵信'] = bf_row[donate_type +'捐款人姓名']
+                        #出生年
+                        try:
+                            birthYear = int(bf_row[donate_type + '出生年份'])
+                        except:
+                            birthYear = 0
+                        if birthYear < 1800 or birthYear > 2100:
+                            new_row['出生年'] = None
+                        else:
+                            new_row['出生年'] = birthYear
 
                 writer.writerow(new_row)
