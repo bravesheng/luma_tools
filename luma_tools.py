@@ -1,39 +1,6 @@
 import csv
 from datetime import datetime
 
-def check_if_rukau(inputFileName):
-    with open(inputFileName, newline='') as csvin:
-        bf_rows = csv.DictReader(csvin)
-        for bf_row in bf_rows:
-            if bf_row['贊助明細'].find('全魯凱語山上教室') != -1:
-                return True
-            else:
-                return False
-
-
-def modify_header(inputFileName, outputFileName):
-    with open(inputFileName, newline='') as inFile, open(outputFileName, 'w', newline='') as outfile:
-        r = csv.reader(inFile)
-        w = csv.writer(outfile)
-
-        next(r, None)  # skip the first row from the reader, the old header
-        # write new header
-        w.writerow(['訂單類別','金流單號','贊助明細','總數量','商品總金額','額外贊助','其他金額款項','小計','運費',
-        '折扣金額（折扣券）','折抵紅利點數','總金額','預計發送紅利點數','已退款金額','目前金額','幣別','商家註記','標籤',
-        '導購來源','導購參數','選項','狀態','收件者姓名','收件者Email','收件者電話','所在國家','居住城市','居住區域',
-        '郵遞區號','收件者地址','想說的話','寄送方式','超商系統','門市名稱','門市代號','門市地址','訂購人姓名','訂購人Email',
-        '訂購人電話','會員ID','會員姓名','會員Email','付款方式','信用卡末四碼','訂單建立時間','付款時間','退款／狀態更新時間',
-        '退款／狀態更新原因','退款／狀態更新操作者','退款／狀態更新操作者身份','實際單位數量','折扣券','出貨狀態','物流編號','分期',
-        '重新扎根 NTD$ 221','重新扎根紙本收據抬頭','重新扎根捐款人姓名','重新扎根出生年份','重新扎根職業','重新扎根性別','重新扎根備註',
-        '寸草春暉 NTD$ 416','寸草春暉紙本收據抬頭','寸草春暉捐款人姓名','寸草春暉出生年份','寸草春暉職業','寸草春暉性別','寸草春暉備註',
-        '春風化雨 NTD$ 641','春風化雨紙本收據抬頭','春風化雨捐款人姓名','春風化雨出生年份','春風化雨職業','春風化雨性別','春風化雨備註',
-        '薪火相傳 NTD$ 830','薪火相傳紙本收據抬頭','薪火相傳捐款人姓名','薪火相傳出生年份','薪火相傳職業','薪火相傳性別','薪火相傳備註',
-        '理念支持 NTD$ 221','理念支持紙本收據抬頭','理念支持捐款人姓名','理念支持出生年份','理念支持職業','理念支持性別','理念支持備註',
-        '理念支持 NTD$ 100','理念支持100備註'])
-        # copy the rest
-        for row in r:
-            w.writerow(row)
-
 def convert_bf_to_neticrm(bf_filename, neticrm_filename):
     with open(bf_filename, newline='') as csvin:
         bf_rows = csv.DictReader(csvin)
@@ -159,33 +126,31 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                         donate_type = '春風化雨'
                     elif bf_row['薪火相傳 NTD$ 830'] == '1':
                         donate_type = '薪火相傳'
+                    elif bf_row['眾志成城 NTD$ 1,300'] == '1':
+                        donate_type = '眾志成城'
                     elif bf_row['理念支持 NTD$ 221'] == '1':
                         donate_type = '理念支持'
-                    elif bf_row['理念支持 NTD$ 100'] == '1':
-                        donate_type = '理念支持100'  
-                    #備註
-                    new_row['捐款者留言'] = bf_row[donate_type + '備註']
-                    if donate_type != '理念支持100':
-                        #職業
-                        new_row['職業'] = bf_row[donate_type + '職業']
-                        #性別
-                        if len(bf_row[donate_type + '性別']) > 1:
-                            new_row['性別'] = bf_row[donate_type + '性別'].replace('性', '') 
-                        #收據抬頭
-                        new_row['收據抬頭'] = bf_row[donate_type + '紙本收據抬頭']
-                        #捐款徵信
-                        if bf_row[donate_type + '捐款人姓名'] == '與紙本收據抬頭相同':
-                            new_row['捐款徵信'] = new_row['姓名']
-                        else:
-                            new_row['捐款徵信'] = bf_row[donate_type +'捐款人姓名']
-                        #出生年
-                        try:
-                            birthYear = int(bf_row[donate_type + '出生年份'])
-                        except:
-                            birthYear = 0
-                        if birthYear < 1800 or birthYear > 2100:
-                            new_row['出生年'] = None
-                        else:
-                            new_row['出生年'] = birthYear
 
+                    #備註
+                    new_row['捐款者留言'] = bf_row[donate_type + ' - 備註']
+                    #轉換選項欄位dict
+                    bf_row['選項'] = bf_row['選項'].replace('\n', '')
+                    option = bf_row['選項'].replace(' ', '')
+                    option_dict = dict(x.split(":") for x in option.split(","))
+                    #職業
+                    new_row['職業'] = option_dict.get('職業（非必填）')
+                    #性別
+                    if option_dict.get('性別（非必填）') != None:
+                            new_row['性別'] = option_dict.get('性別（非必填）').replace('性', '') 
+                    #收據抬頭
+                    new_row['收據抬頭'] = option_dict.get('紙本收據抬頭')
+                    #捐款徵信
+                    if option_dict.get('捐款人姓名') == '與紙本收據抬頭相同':
+                        new_row['捐款徵信'] = new_row['姓名']
+                    else:
+                        new_row['捐款徵信'] = option_dict.get('捐款人姓名')
+                    #出生年
+                    birthYearDict = {'19歲以下':2007, '20～29歲':1997, '30～39歲':1987, '40～49歲':1977, '50～59歲':1967, '60歲以上':1957} 
+                    new_row['出生年'] = birthYearDict.get(option_dict.get('年齡（非必填）'))
+                
                 writer.writerow(new_row)
