@@ -1,7 +1,7 @@
 import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
-from luma_tools import convert_bf_to_neticrm
+from luma_tools import convert_bf_to_neticrm, modify_header, check_if_rukau
 from shutil import rmtree
 from datetime import datetime
 
@@ -41,7 +41,12 @@ def upload_file():
             now = datetime.now()
             rukai_filename = filename.replace('.csv','_rukau.csv')
             converted_filename = filename.replace('.csv','_neticrm_' + now.strftime('%y%m%d%H%M%S') + '.csv')
-            convert_bf_to_neticrm(UPLOAD_FOLDER + '/' + filename, UPLOAD_FOLDER + '/' + converted_filename)
+            #convert
+            if check_if_rukau(UPLOAD_FOLDER + '/' + filename) == True:
+                modify_header(UPLOAD_FOLDER + '/' + filename, UPLOAD_FOLDER + '/' + rukai_filename)
+                convert_bf_to_neticrm(UPLOAD_FOLDER + '/' + rukai_filename, UPLOAD_FOLDER + '/' + converted_filename)
+            else:
+                convert_bf_to_neticrm(UPLOAD_FOLDER + '/' + filename, UPLOAD_FOLDER + '/' + converted_filename)
             return redirect(url_for('download_file', name=converted_filename))
     return '''
     <!doctype html>
