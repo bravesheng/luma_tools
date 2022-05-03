@@ -171,27 +171,41 @@ def convert_bf_to_neticrm(bf_filename, neticrm_filename):
                     elif bf_row['理念支持 NTD$ 100'] == '1':
                         donate_type = '理念支持100'             
                     elif bf_row['寸草春暉 NTD$ 400'] == '1':
-                        donate_type = '寸草四百'    
+                        donate_type = '寸草四百'
                     #備註
                     new_row['捐款者留言'] = bf_row[donate_type + '備註']
-                    #轉換選項欄位dict
-                    bf_row['選項'] = bf_row['選項'].replace('\n', '')
-                    option = bf_row['選項'].replace(' ', '')
-                    if len(option) > 0:
-                        option_dict = dict(x.split(":") for x in option.split(","))
+                    if donate_type != '理念支持100': #理念支持100只有備註沒其他資料
                         #職業
-                        new_row['職業'] = option_dict.get('職業（非必填）')
+                        new_row['職業'] = bf_row[donate_type + '職業']
                         #性別
-                        if option_dict.get('性別（非必填）') != None:
-                            new_row['性別'] = option_dict.get('性別（非必填）').replace('性', '') 
+                        new_row['性別'] = bf_row[donate_type + '性別']
+                        if len(new_row['性別']) != 0:
+                            new_row['性別'] = new_row['性別'].replace('性', '') 
                         #收據抬頭
-                        new_row['收據抬頭'] = option_dict.get('紙本收據抬頭')
+                        new_row['收據抬頭'] = bf_row[donate_type + '紙本收據抬頭']
                         #捐款徵信
-                        if option_dict.get('捐款人姓名') == '與紙本收據抬頭相同':
+                        if bf_row[donate_type + '捐款人姓名'] == '與紙本收據抬頭相同':
                             new_row['捐款徵信'] = new_row['姓名']
                         else:
-                            new_row['捐款徵信'] = option_dict.get('捐款人姓名')
+                            new_row['捐款徵信'] = bf_row[donate_type + '捐款人姓名']
                         #出生年
-                        birthYearDict = {'19歲以下':2007, '20～29歲':1997, '30～39歲':1987, '40～49歲':1977, '50～59歲':1967, '60歲以上':1957} 
-                        new_row['出生年'] = birthYearDict.get(option_dict.get('年齡（非必填）'))
+                        #先嘗試檢查“出生年份”欄位是否有可用數值
+                        if len(bf_row[donate_type + '出生年份']) != 0:
+                            new_row['出生年'] = bf_row[donate_type + '出生年份']
+                            try:
+                                birthYear = int(new_row['出生年'])
+                            except:
+                                birthYear = 0
+                            if birthYear < 1800 or birthYear > 2100:
+                                new_row['出生年'] = None
+                            else:
+                                new_row['出生年'] = birthYear
+                        else:
+                            new_row['出生年'] = None
+                        #假如"出生年份"無可用數值，則檢查年齡欄位
+                        if new_row['出生年'] == None:
+                            if donate_type != '寸草四百': #寸草四百沒有年齡
+                                birthYearDict = {'19歲以下':2007, '20～29歲':1997, '30～39歲':1987, '40～49歲':1977, '50～59歲':1967, '60歲以上':1957}
+                                bf_row[donate_type + '年齡'] =  bf_row[donate_type + '年齡'].replace(' ','')
+                                new_row['出生年'] = birthYearDict.get(bf_row[donate_type + '年齡'])
                 writer.writerow(new_row)
