@@ -1,1 +1,1 @@
-web: gunicorn flask_luma_app.py
+web: gunicorn upload_file:app
