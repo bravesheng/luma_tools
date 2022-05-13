@@ -1,1 +1,1 @@
-web: gunicorn csv:app
+web gunicorn app_run:app
