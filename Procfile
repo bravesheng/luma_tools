@@ -1,1 +1,1 @@
-web gunicorn app_run:app
+web gunicorn flask_luma_app:app
