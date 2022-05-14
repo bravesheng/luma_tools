@@ -58,7 +58,7 @@ def upload_file():
     return '''
     <!doctype html>
     <title>Upload new File</title>
-    <h1>請上傳貝殼放大CSV匯出檔</h1>
+    <h1>請上傳貝殼放大匯出檔（XLS或者CSV都支援）</h1>
     <form method=post enctype=multipart/form-data>
       <input type=file name=file>
       <input type=submit value=Upload>
