@@ -6,7 +6,7 @@ from shutil import rmtree
 from datetime import datetime
 
 UPLOAD_FOLDER = os.getcwd() + '/csv'
-ALLOWED_EXTENSIONS = {'csv'}
+ALLOWED_EXTENSIONS = {'csv','xls'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -37,6 +37,13 @@ def upload_file():
             os.mkdir(app.config['UPLOAD_FOLDER'])
             #save original csv
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            #convert xls to csv
+            if filename.find('xls') != -1:
+                import pandas as pd
+                read_file = pd.read_excel(UPLOAD_FOLDER + '/' + filename, dtype=str)
+                csv_filename = filename.replace('.xls','.csv')
+                read_file.to_csv(UPLOAD_FOLDER + '/' + csv_filename, index=None, header=True)
+                filename = csv_filename
             #prepare new csv file name
             now = datetime.now()
             rukai_filename = filename.replace('.csv','_rukau.csv')
