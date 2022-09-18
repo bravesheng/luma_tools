@@ -72,4 +72,5 @@ def download_file(name):
     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
 
 if __name__ == '__main__':
-    app.run()
+    #app.run()
+    app.run(debug=True, host='0.0.0.0', port=5000)
